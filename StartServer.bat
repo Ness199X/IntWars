@@ -1,1 +1,1 @@
-build/intwars.exe
+build/gamed/intwars.exe
