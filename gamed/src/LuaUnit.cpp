@@ -54,7 +54,7 @@ void LuaScript::addUnit() {
             "dealDamageTo", &Unit::dealDamageTo,
             "getTarget", &Unit::getTarget, //some Object methods
             "setTarget", &Unit::setTarget,
-            "setTeam", &Unit::setTeam,
+            "getTeam", &Unit::getTeam,
             "setTeam", &Unit::setTeam,
             "setTargetUnit", &Unit::setTargetUnit,
             "isToRemove", &Unit::isToRemove,

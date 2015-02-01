@@ -67,6 +67,7 @@ public:
    void stopTargeting(Unit* target);
 
    std::vector<Champion*> getChampionsInRange(Target* t, float range, bool isAlive = false);
+   std::vector<Unit*> getUnitsInRange(Target* t, float range, bool isAlive = false);
    
    bool getFirstBlood() { return firstBlood; }
    void setFirstBlood(bool state) { firstBlood = state; }

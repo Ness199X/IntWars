@@ -43,7 +43,9 @@ void Minion::update(int64 diff)
 
 	if (!isDead())
 	{
-		if (scanForTargets())     // returns true if we have a target
+		if ( dashing )
+			return;
+		else if (scanForTargets())     // returns true if we have a target
 			keepFocussingTarget(); // fight target
 		else walkToDestination(); // walk to destination (or target)
 	}

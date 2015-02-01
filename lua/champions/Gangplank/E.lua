@@ -1,10 +1,19 @@
 function finishCasting()
-    print("Speed increase" ..getEffectValue(3))
-    
-    local buff = Buff.new("RaiseMorale", 7.0, BUFFTYPE_TEMPORARY, getOwner())
-    
-    buff:setMovementSpeedPercentModifier(getEffectValue(3))
-    addBuff(buff)
+	local speed = getEffectValue( 3 )
+	local owner = getOwner()
+	local myTeam = owner:getTeam()
+	local units = getUnitsInRange( owner, 1300, true )
+
+    print("Speed increase" .. speed)
+
+	for key,value in pairs( units ) do
+		if myTeam == value:getTeam() then
+		    local buff = Buff.new( "RaiseMorale", 7.0, BUFFTYPE_TEMPORARY, value )
+		    buff:setMovementSpeedPercentModifier( getEffectValue(3) )
+		    addBuff( buff, value )
+	        addParticleTarget( "pirate_raiseMorale_tar.troy", value )
+		end
+	end
 end
 
 function applyEffects()

@@ -430,7 +430,10 @@ bool Game::handleCastSpell(HANDLE_ARGS) {
 
    uint32 futureProjNetId = GetNewNetID();
    uint32 spellNetId = GetNewNetID();
-   Spell* s = peerInfo(peer)->getChampion()->castSpell(spell->spellSlot, spell->x, spell->y, 0, futureProjNetId, spellNetId);
+   Object *targetObj = map->getObjectById( spell->targetNetId );
+   Unit *targetUnit = dynamic_cast<Unit*>(targetObj);
+
+   Spell* s = peerInfo(peer)->getChampion()->castSpell(spell->spellSlot, spell->x, spell->y, targetUnit, futureProjNetId, spellNetId);
 
    if(!s) {
       return false;

@@ -5,7 +5,7 @@ function finishCasting()
     print("Speed increase" ..speedIncrease)
     
     buff:setMovementSpeedPercentModifier(speedIncrease)
-    addBuff(buff)
+    addBuff(buff, getOwner())
 end
 
 function applyEffects()

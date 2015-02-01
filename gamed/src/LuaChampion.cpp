@@ -28,6 +28,8 @@ void LuaScript::addChampion() {
             "getY", &Champion::getY,
             "setTarget", &Champion::setTarget,
             "setTargetUnit", &Champion::setTargetUnit,
+            "getTeam", &Champion::getTeam,
+            "setTeam", &Champion::setTeam,
             "getBuff", &Champion::getBuff); //Also inherited from unit
             //"distanceWith", &Champion::distanceWith); //Will simply not work
     lua.set_userdata(championUserData);

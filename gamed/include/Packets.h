@@ -933,7 +933,9 @@ public:
 class LoadScreenPlayerName : public Packet {
 public:
    LoadScreenPlayerName(const ClientInfo& player) : Packet(PKT_S2C_LoadName) {
-      buffer << player.userId;
+      buffer << (uint32)player.userId;
+	  buffer << (uint16)clock();
+	  buffer << 0x8E00; //sometimes 0x8E02
       buffer << (uint32)0;
       buffer << (uint32)player.getName().length()+1;
       buffer << player.getName();

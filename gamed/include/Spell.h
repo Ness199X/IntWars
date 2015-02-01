@@ -78,6 +78,7 @@ protected:
    float castTime;
    float castRange;
    float projectileSpeed;
+   float lineWidth;
    std::array<float, 5> cooldown;
    std::array<float, 5> cost;
    

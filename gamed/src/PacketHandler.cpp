@@ -83,7 +83,7 @@ void Game::printPacket(const uint8 *buffer, uint32 size)
 			sprintf(stringbuffer + strlen(stringbuffer), "%04d-%04d ", i, ppMIN(i + 15, size - 1));
       }
 
-		sprintf(stringbuffer + strlen(stringbuffer), "%02x ", buffer[i]);
+		sprintf(stringbuffer + strlen(stringbuffer), "%02X ", buffer[i]);
    }
    
    for(i = ((16-i%16)%16); i > 0; --i)

@@ -20,12 +20,22 @@ Map::~Map()
 void Map::update(int64 diff) {
 
    for(auto kv = objects.begin(); kv != objects.end();) {
-	   if (kv->second->isToRemove() && kv->second->getAttackerCount() == 0) 
+	   if (kv->second->isToRemove()) 
 	   {
-			//collisionHandler->stackChanged(kv->second);
-			collisionHandler->removeObject(kv->second);
-			delete kv->second;
-			kv = objects.erase(kv);
+         if (kv->second->getAttackerCount() == 0)
+         {
+            //collisionHandler->stackChanged(kv->second);
+            collisionHandler->removeObject(kv->second);
+            delete kv->second;
+            kv = objects.erase(kv);
+         }
+         else
+         {
+            // do nothing for this unit while we wait for
+            // attackers to finish
+            ++kv;
+         }
+
 			continue;
 		}
 
@@ -214,6 +224,19 @@ std::vector<Champion*> Map::getChampionsInRange(Target* t, float range, bool isA
 		}
 	}
 	return champs;
+}
+
+std::vector<Unit*> Map::getUnitsInRange(Target* t, float range, bool isAlive) {
+   std::vector<Unit*> units;
+   for (auto kv = objects.begin(); kv != objects.end(); ++kv) {
+      Unit* u = dynamic_cast<Unit*>(kv->second);
+      if (u && t->distanceWith(u)<=range) {
+         if(isAlive && !u->isDead() || !isAlive) {
+            units.push_back(u);
+         }
+      }
+   }
+   return units;
 }
 
 bool Map::teamHasVisionOn(int team, Object* o) {

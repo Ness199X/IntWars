@@ -39,6 +39,7 @@ Spell::Spell(Champion* owner, const std::string& spellName, uint8 slot) : owner(
    castRange = inibin.getFloatValue("SpellData", "CastRange");
    projectileSpeed = inibin.getFloatValue("SpellData", "MissileSpeed");
    coefficient = inibin.getFloatValue("SpellData", "Coefficient");
+   lineWidth = inibin.getFloatValue("SpellData", "LineWidth");
    
    char i = 1;
    while(true) {
@@ -151,6 +152,7 @@ void Spell::loadLua(LuaScript& script){
    script.lua.set_function("getSpellLevel", [this]() { return getLevel(); });
    script.lua.set_function("getOwnerLevel", [this]() { return owner->getStats().getLevel(); });
    script.lua.set_function("getChampionModel", [this]() { return owner->getModel(); });
+   script.lua.set_function("getCastTarget", [this]() { return this->target; });
    
    script.lua.set_function("setChampionModel", [this](const std::string& newModel) {
       owner->setModel(newModel); 
@@ -196,7 +198,15 @@ void Spell::loadLua(LuaScript& script){
    script.lua.set_function("getCoefficient", [this]() { return coefficient; });
    
    script.lua.set_function("addProjectile", [this](float toX, float toY) { 
-      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), 30, owner, new Target(toX, toY), this, projectileSpeed, RAFFile::getHash(spellName +"Missile"), projectileFlags ? projectileFlags : flags);
+      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, new Target(toX, toY), this, projectileSpeed, RAFFile::getHash(spellName +"Missile"), projectileFlags ? projectileFlags : flags);
+      owner->getMap()->addObject(p);
+      owner->getMap()->getGame()->notifyProjectileSpawn(p);
+
+      return;
+   });
+   
+   script.lua.set_function("addProjectileTarget", [this](Target *t) { 
+      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, t, this, projectileSpeed, RAFFile::getHash(spellName +"Missile"), projectileFlags ? projectileFlags : flags);
       owner->getMap()->addObject(p);
       owner->getMap()->getGame()->notifyProjectileSpawn(p);
 
@@ -204,7 +214,15 @@ void Spell::loadLua(LuaScript& script){
    });
    
    script.lua.set_function("addProjectileCustom", [this](const std::string& name, float projSpeed, float toX, float toY) { 
-      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), 30, owner, new Target(toX, toY), this, projectileSpeed, RAFFile::getHash(name), projectileFlags ? projectileFlags : flags);
+      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, new Target(toX, toY), this, projectileSpeed, RAFFile::getHash(name), projectileFlags ? projectileFlags : flags);
+      owner->getMap()->addObject(p);
+      owner->getMap()->getGame()->notifyProjectileSpawn(p);
+
+      return;
+   });
+   
+   script.lua.set_function("addProjectileTargetCustom", [this](const std::string& name, float projSpeed, Target *t) { 
+      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, t, this, projectileSpeed, RAFFile::getHash(name), projectileFlags ? projectileFlags : flags);
       owner->getMap()->addObject(p);
       owner->getMap()->getGame()->notifyProjectileSpawn(p);
 
@@ -215,7 +233,7 @@ void Spell::loadLua(LuaScript& script){
     * For spells that don't require SpawnProjectile, but for which we still need to track the projectile server-side
     */
    script.lua.set_function("addServerProjectile", [this](float toX, float toY) { 
-      Projectile* p = new Projectile(owner->getMap(), futureProjNetId, owner->getX(), owner->getY(), 30, owner, new Target(toX, toY), this, projectileSpeed, 0, projectileFlags ? projectileFlags : flags);
+      Projectile* p = new Projectile(owner->getMap(), futureProjNetId, owner->getX(), owner->getY(), lineWidth, owner, new Target(toX, toY), this, projectileSpeed, 0, projectileFlags ? projectileFlags : flags);
       owner->getMap()->addObject(p);
 
       return;
@@ -258,6 +276,14 @@ void Spell::loadLua(LuaScript& script){
       u->setTargetUnit(0);
       owner->getMap()->getGame()->notifyDash(u, x, y, dashSpeed);
       return;
+   });
+
+   script.lua.set_function("getUnitsInRange", [this](Target* t, float range, bool isAlive) {
+      return owner->getMap()->getUnitsInRange(t, range, isAlive);
+   });
+
+   script.lua.set_function("getChampionsInRange", [this](Target* t, float range, bool isAlive) {
+      return owner->getMap()->getChampionsInRange(t, range, isAlive);
    });
 
    try{

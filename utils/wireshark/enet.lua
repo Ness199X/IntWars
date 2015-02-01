@@ -27,23 +27,120 @@ command2string = {
 	[11] = "THROTTLE_CONFIGURE",
 	[99] = "UNKNOWN COMMAND (THIS IS AN ERROR)",
 }
+pf_checksum = ProtoField.new("Checksum", "enet_proto.checksum", ftypes.UINT32)
+pf_flag_has_sent_time = ProtoField.new("'Sent Time'-Flag", "enet_proto.flag_sent_time", ftypes.BOOLEAN)
+pf_peer_id = ProtoField.new("Peer Id", "enet_proto.peer_id", ftypes.UINT16)
+pf_sent_time = ProtoField.new("Sent Time", "enet_proto.sent_time", ftypes.UINT16)
 pf_seqnumber = ProtoField.new("Sequence number", "enet_proto.seqnumber", ftypes.UINT16)
 pf_command = ProtoField.new("Command", "enet_proto.command", ftypes.UINT8, command2string, base.DEC, 0x0f)
 pf_channel = ProtoField.new("ChannelID", "enet_proto.channel", ftypes.UINT8)
-pf_header = ProtoField.new("ENET Header", "enet_proto.header", ftypes.BYTES, nil, base.NONE)
-pf_dataLength = ProtoField.new("Data length", "enet_proto.dataLength", ftypes.UINT16)
+pf_proto_header = ProtoField.new("ENET Protocol Header", "enet_proto.proto_header", ftypes.BYTES, nil, base.NONE)
+pf_header = ProtoField.new("ENET Command Header", "enet_proto.header", ftypes.BYTES, nil, base.NONE)
+pf_data_length = ProtoField.new("Data length", "enet_proto.data_length", ftypes.UINT16)
 pf_data = ProtoField.new("LoL Data", "enet_proto.data", ftypes.BYTES)
-pf_datas = ProtoField.new("LoL Decrypted Data", "enet_proto.datas", ftypes.STRING)
+pf_data_decrypted = ProtoField.new("Decrypted Payload", "enet_proto.data.decrypted", ftypes.BYTES)
 pf_key = ProtoField.new("LoL Game Key", "enet_proto.key", ftypes.STRING)
+
+pf_ack = ProtoField.new("Acknowledge", "enet_proto.acknowledge", ftypes.BYTES, nil, base.NONE)
+pf_ack_seqnum = ProtoField.new("Sequence Number", "enet_proto.acknowledge.seqnum", ftypes.UINT16)
+pf_ack_recvtime = ProtoField.new("Received Time", "enet_proto.acknowledge.recvtime", ftypes.UINT16)
+
+pf_conn = ProtoField.new("Connect", "enet_proto.connect", ftypes.BYTES, nil, base.NONE)
+pf_verify_conn = ProtoField.new("Verify Connect", "enet_proto.verify_connect", ftypes.BYTES, nil, base.NONE)
+pf_conn_peerid = ProtoField.new("Outgoing Peer Id", "enet_proto.connect.peerid", ftypes.UINT16)
+pf_conn_mtu = ProtoField.new("MTU", "enet_proto.connect.mtu", ftypes.UINT16)
+pf_conn_window_size = ProtoField.new("Window Size", "enet_proto.connect.window_size", ftypes.UINT32)
+pf_conn_channels = ProtoField.new("Channel Count", "enet_proto.connect.channels", ftypes.UINT32)
+pf_conn_session_id = ProtoField.new("Session Id", "enet_proto.connect.session_id", ftypes.UINT32)
+
+pf_dc = ProtoField.new("Disconnect", "enet_proto.disconnect", ftypes.BYTES, nil, base.NONE)
+pf_dc_data = ProtoField.new("Ping", "enet_proto.disconnect.data", ftypes.UINT32)
+
+pf_ping = ProtoField.new("Ping", "enet_proto.ping", ftypes.BYTES, nil, base.NONE)
+
+pf_reliable = ProtoField.new("Send Reliable", "enet_proto.reliable", ftypes.BYTES, nil, base.NONE)
+pf_unreliable = ProtoField.new("Send Unreliable", "enet_proto.unreliable", ftypes.BYTES, nil, base.NONE)
+pf_fragment = ProtoField.new("Send Fragment", "enet_proto.fragment", ftypes.BYTES, nil, base.NONE)
+pf_unsequenced = ProtoField.new("Send Unsequenced", "enet_proto.unsequenced", ftypes.BYTES, nil, base.NONE)
+pf_payload_length = ProtoField.new("Payload Length", "enet_proto.payload.length", ftypes.UINT16)
+pf_payload = ProtoField.new("Payload", "enet_proto.payload", ftypes.BYTES, nil, base.NONE)
+pf_unreliable_seqnum = ProtoField.new("Unreliable Sequence Number", "enet_proto.unreliable.seqnum", ftypes.UINT16)
+
+pf_fragment_startseqnum = ProtoField.new("Fragment Start Number", "enet_proto.fragment.startseqnum", ftypes.UINT16)
+pf_fragment_fragcount = ProtoField.new("Fragment Count", "enet_proto.fragment.count", ftypes.UINT32)
+pf_fragment_fragnum = ProtoField.new("Fragment Number", "enet_proto.fragment.num", ftypes.UINT32)
+pf_fragment_total_length = ProtoField.new("Total Length", "enet_proto.fragment.length", ftypes.UINT32)
+pf_fragment_offset = ProtoField.new("Offset", "enet_proto.fragment.offset", ftypes.UINT32)
+
+pf_unsequenced_group = ProtoField.new("Unsequenced Group", "enet_proto.unsequenced.group", ftypes.UINT16)
+
+pf_bandwidth_limit = ProtoField.new("Bandwidth Limit", "enet_proto.bandwidth_limit", ftypes.BYTES, nil, base.NONE)
+pf_bandwidth_incoming_bandwidth = ProtoField.new("Incoming Bandwidth", "enet_proto.bandwidth_limit.incoming_bandwidth", ftypes.UINT32)
+pf_bandwidth_outgoing_bandwidth = ProtoField.new("Outgoing Bandwidth", "enet_proto.bandwidth_limit.outgoing_bandwidth", ftypes.UINT32)
+
+pf_packet_throttle = ProtoField.new("Packet Throttle", "enet_proto.packet_throttle", ftypes.BYTES, nil, base.NONE)
+pf_throttle_throttle_interval = ProtoField.new("Packet Throttle Interval", "enet_proto.connect.throttle_interval", ftypes.UINT32)
+pf_throttle_throttle_accel = ProtoField.new("Packet Throttle Acceleration", "enet_proto.connect.throttle_accel", ftypes.UINT32)
+pf_throttle_throttle_decel = ProtoField.new("Packet Throttle Deceleration", "enet_proto.connect.throttle_decel", ftypes.UINT32)
+
+
 enet_proto.fields = {
+	pf_checksum,
+	pf_flag_has_sent_time,
+	pf_peer_id,
+	pf_sent_time,
 	pf_seqnumber,
 	pf_command,
 	pf_channel,
+	pf_proto_header,
 	pf_header,
-	pf_dataLength,
+	pf_data_length,
 	pf_data,
-	pf_datas,
-	pf_key
+	pf_data_decrypted,
+	pf_key,
+
+	pf_ack,
+	pf_ack_seqnum,
+	pf_ack_recvtime,
+
+	pf_conn,
+	pf_verify_conn,
+	pf_conn_peerid,
+	pf_conn_mtu,
+	pf_conn_window_size,
+	pf_conn_channels,
+	pf_bandwidth_incoming_bandwidth,
+	pf_bandwidth_outgoing_bandwidth,
+	pf_throttle_throttle_interval,
+	pf_throttle_throttle_accel,
+	pf_throttle_throttle_decel,
+	pf_conn_session_id,
+
+	pf_dc,
+	pf_dc_data,
+
+	pf_ping,
+
+	pf_reliable,
+	pf_unreliable,
+	pf_fragment,
+	pf_unsequenced,
+
+	pf_payload_length,
+	pf_payload,
+
+	pf_unreliable_seqnum,
+
+	pf_fragment_startseqnum,
+	pf_fragment_fragcount,
+	pf_fragment_fragnum,
+	pf_fragment_total_length,
+	pf_fragment_offset,
+
+	pf_packet_throttle,
+	pf_bandwidth_limit,
+
+	pf_unsequenced_group
 }
 
 lolcmds = {
@@ -136,24 +233,79 @@ function enet_proto.dissector(tvbuf, pktinfo, root)
 	
 	tree = root:add(enet_proto, tvbuf:range(0,pktlen))
 	
-	header = tree:add(pf_header, tvbuf:range(0,8))
+	-- proto header
+
+	-- Seems like sent_time is always included?
+	--[[
+	has_sent_time = tvbuf:range(4, 1):bitfield(0, 1) == 1
+	if has_sent_time then
+		header_length = 8
+	else
+		header_length = 6
+	end
+	]]--
+
+	header_length = 8
+	pheader = tvbuf:range(0, header_length)
+	pheader_buf = pheader:tvb()
+	proto_header = tree:add(pf_proto_header, pheader)
 	
-	seqnumber = tvbuf:range(2,2)
-	header:add(pf_seqnumber, seqnumber)
-	
-	command = tvbuf:range(4,1):bitfield(4,4)
+	proto_header:add(pf_checksum, pheader_buf:range(0, 4))
+	--proto_header:add(pf_flag_has_sent_time, pheader_buf:range(4,1), has_sent_time)
+	proto_header:add(pf_peer_id, pheader_buf:range(4,2))
+	--if has_sent_time then
+		proto_header:add(pf_sent_time, pheader_buf:range(6, 2))
+	--end
+
+	-- command header
+	tvbuf = tvbuf:range(header_length):tvb()
+	header = tree:add(pf_header, tvbuf:range(0, 4))
+
+	command = tvbuf:range(0,1):bitfield(4,4)
 	if command >= 0 and command <= 11 then
-		header:add(pf_command, tvbuf:range(4,1))
+		header:add(pf_command, tvbuf:range(0,1))
 	else
 		print("unknown command")
 		command = 99
 	end
+
+	channel = tvbuf:range(1, 1)
+	header:add(pf_channel, channel)
+
+	seqnumber = tvbuf:range(2,2)
+	header:add(pf_seqnumber, seqnumber)
 	
 	pktinfo.cols.info = command2string[command]
+
 	
-	channel = tvbuf:range(5,1)
-	header:add(pf_channel, channel)
-	
+	-- command-based parsing
+	tvbuf = tvbuf:range(4):tvb()
+
+	if command == 1 then
+		parse_acknowledge(tvbuf, tree)
+	elseif command == 2 then
+		parse_connect(tvbuf, tree)
+	elseif command == 3 then
+		parse_verify_connect(tvbuf, tree)
+	elseif command == 4 then
+		parse_disconnect(tvbuf, tree)
+	elseif command == 5 then
+		parse_ping(tvbuf, tree)
+	elseif command == 6 then
+		parse_reliable(tvbuf, tree, pktinfo)
+	elseif command == 7 then
+		parse_unreliable(tvbuf, tree, pktinfo)
+	elseif command == 8 then
+		parse_fragment(tvbuf, tree, pktinfo)
+	elseif command == 9 then
+		parse_unsequenced(tvbuf, tree, pktinfo)
+	elseif command == 10 then
+		parse_bandwidth_limit(tvbuf, tree)
+	elseif command == 11 then
+		parse_packet_throttle(tvbuf, tree)
+	end
+
+	--[[
 	if command == 6 then
 	
 		loltree = root:add(pf_data, tvbuf:range(10, pktlen - 10))
@@ -170,23 +322,23 @@ function enet_proto.dissector(tvbuf, pktinfo, root)
 		
 		while coverage < pktlen do
 		
-			dataLength = tvbuf:range(coverage-2,2)
-			loltree:add(pf_dataLength, dataLength)
+			data_length = tvbuf:range(coverage-2,2)
+			loltree:add(pf_data_length, data_length)
 			
-			data = tvbuf:range(coverage, dataLength:uint())
+			data = tvbuf:range(coverage, data_length:uint())
 			
-			dataTemp = {}
+			data_tmp = {}
 			
-			for i=0, dataLength:uint()-1 do
-				dataTemp[i] = tvbuf:range(coverage+i, 1):uint()
+			for i=0, data_length:uint()-1 do
+				data_tmp[i] = tvbuf:range(coverage+i, 1):uint()
 			end
 			
-			decryptedData = bf_Decrypt(dataTemp, dataLength:uint())
+			decryptedData = bf_Decrypt(data_tmp, data_length:uint())
 			
 			decryptedByteArray = ByteArray.new()
 			decryptedHexString = ""
-			decryptedByteArray:set_size(dataLength:uint())
-			for i=0, dataLength:uint()-1 do
+			decryptedByteArray:set_size(data_length:uint())
+			for i=0, data_length:uint()-1 do
 				decryptedByteArray:set_index(i, decryptedData[i])
 				decryptedHexString = decryptedHexString .. string.format("%x ", decryptedData[i])
 			end
@@ -196,9 +348,9 @@ function enet_proto.dissector(tvbuf, pktinfo, root)
 				pktinfo.cols.info:append(" " .. lolcmds[lolcmd])
 			end
 			
-			loltree:add(pf_datas, tvbuf:range(coverage, dataLength:uint()), decryptedHexString)
+			loltree:add(pf_data_decrypted, tvbuf:range(coverage, data_length:uint()), decryptedHexString)
 			
-			coverage = coverage + dataLength:uint()
+			coverage = coverage + data_length:uint()
 			
 			if coverage < pktlen and 
 			( tvbuf:range(coverage, 1):uint() == 0x07 or tvbuf:range(coverage, 1):uint() == 0x49 ) then
@@ -210,8 +362,176 @@ function enet_proto.dissector(tvbuf, pktinfo, root)
 		end
 		
 	end
-	
+	--]]
 end
+
+function decode_payload(tvrange, tree, pktinfo)
+	tvbuf = tvrange:tvb()
+
+	loltree = tree:add(pf_data, tvrange)
+	loltree:set_text("Decrypted Payload")
+	
+	if b64key == "" then
+		loltree:add(pf_key, "No key found" .. " (" .. b64keyfile .. ")")
+		return
+	end
+	
+	loltree:add(pf_key, b64key .. " (" .. b64keyfile .. ")")
+
+	coverage = 0
+	
+	--while coverage < pktlen do
+	
+		data_length = tvbuf:len()
+		loltree:add(pf_data_length, data_length)
+		
+		data_tmp = {}
+		
+		for i=0, data_length-1 do
+			data_tmp[i] = tvbuf:range(i, 1):uint()
+		end
+		
+		decryptedData = bf_Decrypt(data_tmp, data_length)
+		
+		decryptedHexString = ""
+		decryptedByteArray = ByteArray.new()
+		decryptedByteArray:set_size(data_length)
+		for i=0, data_length-1 do
+			decryptedByteArray:set_index(i, decryptedData[i])
+			decryptedHexString = decryptedHexString .. string.format("%x ", decryptedData[i])
+		end
+		
+		lolcmd = decryptedByteArray:get_index(0)
+		if lolcmds[lolcmd] ~= nil then
+			pktinfo.cols.info:append(" " .. lolcmds[lolcmd])
+		end
+		
+		loltree:add(pf_payload, tvrange)
+		-- Wireshark crashes for tvbufs where the source is not a child of the original tvbuf
+		--loltree:add(pf_data_decrypted, decryptedByteArray:tvb():range(0))
+		
+		--[[ No longer needed
+		coverage = coverage + data_length
+		
+		if coverage < pktlen and 
+		( tvbuf:range(coverage, 1):uint() == 0x07 or tvbuf:range(coverage, 1):uint() == 0x49 ) then
+			coverage = coverage + 8
+		else
+			coverage = coverage + 6
+		end
+		]]--
+		
+	--end
+end
+
+function parse_acknowledge(tvbuf, tree)
+	ack_buf = tvbuf:range(0, 4)
+	ack = tree:add(pf_ack, ack_buf)
+
+	ack:add(pf_ack_seqnum, tvbuf:range(0, 2))
+	ack:add(pf_ack_recvtime, tvbuf:range(2, 2))
+end
+
+function parse_connect(tvbuf, tree)
+	conn_buf = tvbuf:range(0, 36)
+	conn = tree:add(pf_conn, conn_buf)
+
+	conn:add(pf_conn_peerid, tvbuf:range(0, 2))
+	conn:add(pf_conn_mtu, tvbuf:range(2, 2))
+	conn:add(pf_conn_window_size, tvbuf:range(4, 4))
+	conn:add(pf_conn_channels, tvbuf:range(8, 4))
+	conn:add(pf_bandwidth_incoming_bandwidth, tvbuf:range(12, 4))
+	conn:add(pf_bandwidth_outgoing_bandwidth, tvbuf:range(16, 4))
+	conn:add(pf_throttle_throttle_interval, tvbuf:range(20, 4))
+	conn:add(pf_throttle_throttle_accel, tvbuf:range(24, 4))
+	conn:add(pf_throttle_throttle_decel, tvbuf:range(28, 4))
+	conn:add(pf_conn_session_id, tvbuf:range(32, 4))
+end
+
+function parse_verify_connect(tvbuf, tree)
+	conn_buf = tvbuf:range(0, 32)
+	conn = tree:add(pf_verify_conn, conn_buf)
+
+	conn:add(pf_conn_peerid, tvbuf:range(0, 2))
+	conn:add(pf_conn_mtu, tvbuf:range(2, 2))
+	conn:add(pf_conn_window_size, tvbuf:range(4, 4))
+	conn:add(pf_conn_channels, tvbuf:range(8, 4))
+	conn:add(pf_bandwidth_incoming_bandwidth, tvbuf:range(12, 4))
+	conn:add(pf_bandwidth_outgoing_bandwidth, tvbuf:range(16, 4))
+	conn:add(pf_throttle_throttle_interval, tvbuf:range(20, 4))
+	conn:add(pf_throttle_throttle_accel, tvbuf:range(24, 4))
+	conn:add(pf_throttle_throttle_decel, tvbuf:range(28, 4))
+end
+
+function parse_disconnect(tvbuf, tree)
+	dc_buf = tvbuf:range(0, 4)
+	dc = tree:add(pf_dc, dc_buf)
+
+	dc:add(pf_dc_data, tvbuf:range(0, 4))
+end
+
+function parse_ping(tvbuf, tree)
+	ping_buf = tvbuf:range(0)
+	ping = tree:add(pf_ping, ping_buf)
+end
+
+function parse_reliable(tvbuf, tree, pktinfo)
+	buf = tvbuf:range(0)
+	reliable = tree:add(pf_reliable, buf)
+
+	reliable:add(pf_payload_length, tvbuf:range(0, 2))
+	decode_payload(tvbuf:range(2), reliable, pktinfo)
+end
+
+function parse_unreliable(tvbuf, tree, pktinfo)
+	buf = tvbuf:range(0)
+	unreliable = tree:add(pf_unreliable, buf)
+
+	unreliable:add(pf_unreliable_seqnum, tvbuf:range(0, 2))
+	unreliable:add(pf_payload_length, tvbuf:range(2, 2))
+	decode_payload(tvbuf:range(4), reliable, pktinfo)
+end
+
+function parse_fragment(tvbuf, tree, pktinfo)
+	buf = tvbuf:range(0)
+	fragment = tree:add(pf_fragment, buf)
+
+	fragment:add(pf_fragment_startseqnum, tvbuf:range(0, 2))
+	fragment:add(pf_payload_length, tvbuf:range(2, 2))
+	fragment:add(pf_fragment_fragcount, tvbuf:range(4, 4))
+	fragment:add(pf_fragment_fragnum, tvbuf:range(8, 4))
+	fragment:add(pf_fragment_total_length, tvbuf:range(12, 4))
+	fragment:add(pf_fragment_offset, tvbuf:range(16, 4))
+	fragment:add(pf_payload, tvbuf:range(20))
+end
+
+function parse_unsequenced(tvbuf, tree, pktinfo)
+	buf = tvbuf:range(0)
+	unsequenced = tree:add(pf_unsequenced, buf)
+
+	unsequenced:add(pf_unsequenced_group, tvbuf:range(0, 2))
+	unsequenced:add(pf_payload_length, tvbuf:range(2, 2))
+	unsequenced:add(pf_payload, tvbuf:range(4))
+end
+
+function parse_bandwidth_limit(tvbuf, tree)
+	buf = tvbuf:range(0)
+	limit = tree:add(pf_bandwidth_limit)
+
+	limit:add(pf_bandwidth_incoming_bandwidth, tvbuf:range(0, 4))
+	limit:add(pf_bandwidth_outgoing_bandwidth, tvbuf:range(4, 4))
+end
+
+function parse_packet_throttle(tvbuf, tree)
+	buf = tvbuf:range(0)
+	throttle = tree:add(pf_packet_throttle)
+
+	throttle:add(pf_throttle_throttle_interval, tvbuf:range(0, 4))
+	throttle:add(pf_throttle_throttle_accel, tvbuf:range(4, 4))
+	throttle:add(pf_throttle_throttle_decel, tvbuf:range(8, 4))
+end
+
+
 
 -- load the udp.port table
 -- udp_table = DissectorTable.get("udp.port")

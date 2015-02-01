@@ -3,14 +3,19 @@ Wireshark Dissector for "LoL ENET"
  
 Tested with
 -------
-Wireshark Version 1.12.0 (v1.12.0-0-g4fab41a from master-1.12)
-Compiled (64-bit) with ... Lua 5.2 ...
-Running on 64-bit Windows 7 Service Pack 1 ...
+* Wireshark Version 1.12.0 (v1.12.0-0-g4fab41a from master-1.12)
+* Lua 5.2
+* Windows:
+  * 64-bit Windows 7 Service Pack 1
+  * Win 8.1 64-bit
+* MinGW x64-4.8.1-release-posix-sjlj-rev5
  
-Blowfish DLL build with
+Setup
 -------
-MinGW x64-4.8.1-release-posix-sjlj-rev5
- 
+1. Download x64-4.8.1-release-posix-sjlj-rev5 from mingwbuilds (http://sourceforge.net/projects/mingwbuilds/files/host-windows/releases/4.8.1/64-bit/threads-posix/sjlj/)
+2. Extract and either place in your path, or add installation directory to your path (if you have another install of MinGW, you can overwrite that if you wish - usually found in C:\MinGW)
+3. Clone this repository and cd into this directory
+
 Installation
 -------
 1. build the dll -> Compile.bat
@@ -28,7 +33,18 @@ Installation
   If this folder doesnt exists, create it.
 3. restart wireshark and check if the plugin is loaded:
   Check if "Wireshark -> Help -> About Wireshark -> Plugins" contains "enet.lua"
-  
+
+Troubleshooting
+-------
+* **Q**: Can't find command 'g++' (or a similar error)
+
+  * **A**: Seems like you are missing a MinGW installation or your MinGW installation is not in the path. If you installed MinGW outside C:\Program Files\, you need to edit your environment variables and append your MinGW installation directory to the 'Path' variable. Alternatively, you can invoke g++ manually via an absolute path - see Compile.bat for the required commands.
+
+
+* **Q**: I get this error: 'C:\Program Files\Wireshark\lua52.dll: file not recognized: File format not recognized'
+
+  * **A**: You probably have a wrong version of MinGW installed, or more than one MinGW installation in the path. You need the version from mingwbuilds mentioned above
+
 Usage
 -------
 Start a capture (Filter: "UDP"). As soon as a packet is captured and detected as "ENET" by the heuristic,

@@ -33,7 +33,7 @@ class Packet;
 #define PEER_MTU 996
 #define RELIABLE ENET_PACKET_FLAG_RELIABLE
 #define UNRELIABLE 0
-#define GAME_VERSION "Version 4.18.0.282 [PUBLIC]"
+#define GAME_VERSION "Version 4.20.0.315 [PUBLIC]"
 
 #define peerInfo(p) ((ClientInfo*)p->data)
 
