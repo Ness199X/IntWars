@@ -1,4 +1,5 @@
 #include "Champion.h"
+#include "Config.h"
 #include "RAFManager.h"
 #include "Inibin.h"
 #include "Map.h"
@@ -19,9 +20,9 @@ Champion::Champion(const std::string& type, Map* map, uint32 id, uint32 playerId
       CORE_ERROR("couldn't find champion stats for %s", type.c_str());
       return;
    }
-   
+
    Inibin inibin(iniFile);
-   
+
    stats->setCurrentHealth(inibin.getFloatValue("Data", "BaseHP"));
    stats->setMaxHealth(inibin.getFloatValue("Data", "BaseHP"));
    stats->setCurrentMana(inibin.getFloatValue("Data", "BaseMP"));
@@ -33,7 +34,7 @@ Champion::Champion(const std::string& type, Map* map, uint32 id, uint32 playerId
    stats->setMagicArmor(inibin.getFloatValue("DATA", "SpellBlock"));
    stats->setHp5(inibin.getFloatValue("DATA", "BaseStaticHPRegen"));
    stats->setMp5(inibin.getFloatValue("DATA", "BaseStaticMPRegen"));
-   
+
    stats->setHealthPerLevel(inibin.getFloatValue("DATA", "HPPerLevel"));
    stats->setManaPerLevel(inibin.getFloatValue("DATA", "MPPerLevel"));
    stats->setAdPerLevel(inibin.getFloatValue("DATA", "DamagePerLevel"));
@@ -42,15 +43,15 @@ Champion::Champion(const std::string& type, Map* map, uint32 id, uint32 playerId
    stats->setHp5RegenPerLevel(inibin.getFloatValue("DATA", "HPRegenPerLevel"));
    stats->setMp5RegenPerLevel(inibin.getFloatValue("DATA", "MPRegenPerLevel"));
    stats->setBaseAttackSpeed(0.625f/(1+inibin.getFloatValue("DATA", "AttackDelayOffsetPercent")));
-   
+
    spells.push_back(new Spell(this, inibin.getStringValue("Data", "Spell1"), 0));
    spells.push_back(new Spell(this, inibin.getStringValue("Data", "Spell2"), 1));
    spells.push_back(new Spell(this, inibin.getStringValue("Data", "Spell3"), 2));
    spells.push_back(new Spell(this, inibin.getStringValue("Data", "Spell4"), 3));
-   
+
    setMelee(inibin.getBoolValue("DATA", "IsMelee"));
    setCollisionRadius(inibin.getIntValue("DATA", "PathfindingCollisionRadius"));
-   
+
    iniFile.clear();
    if(!RAFManager::getInstance()->readFile("DATA/Characters/"+type+"/Spells/"+type+"BasicAttack.inibin", iniFile)) {
       if(!RAFManager::getInstance()->readFile("DATA/Spells/"+type+"BasicAttack.inibin", iniFile)) {
@@ -58,28 +59,28 @@ Champion::Champion(const std::string& type, Map* map, uint32 id, uint32 playerId
          return;
       }
    }
-   
+
    Inibin autoAttack(iniFile);
-   
+
    autoAttackDelay = autoAttack.getFloatValue("SpellData", "castFrame")/30.f;
    autoAttackProjectileSpeed = autoAttack.getFloatValue("SpellData", "MissileSpeed");
-   
+
    std::string scriptloc = "../../lua/champions/" + this->getType() + "/Passive.lua";
 	CORE_INFO("Loading %s", scriptloc.c_str());
    try{
     unitScript = LuaScript(true);//fix
-    
+
     unitScript.lua.set("me", this);
 
     unitScript.loadScript(scriptloc);
-    
+
     unitScript.lua.set_function("dealMagicDamage", [this](Unit* target, float amount) { this->dealDamageTo(target,amount,DAMAGE_TYPE_MAGICAL,DAMAGE_SOURCE_SPELL); });
     unitScript.lua.set_function("addBuff", [this](Buff b, Unit* target){
       target->addBuff(new Buff(b));
       return;
    });
-   
-    unitScript.lua.set_function("addParticleTarget", [this](const std::string& particle, Target* u) { 
+
+    unitScript.lua.set_function("addParticleTarget", [this](const std::string& particle, Target* u) {
       this->getMap()->getGame()->notifyParticleSpawn(this, u, particle);
       return;
    });
@@ -94,15 +95,15 @@ Spell* Champion::castSpell(uint8 slot, float x, float y, Unit* target, uint32 fu
    if(slot >= spells.size()) {
       return 0;
    }
-   
+
    Spell* s = spells[slot];
-   
+
    s->setSlot(slot);//temporary hack until we redo spells to be almost fully lua-based
-   
+
    if((s->getCost() * (1 - stats->getSpellCostReduction())) > stats->getCurrentMana() || s->getState() != STATE_READY) {
       return 0;
    }
-   
+
    s->cast(x, y, target, futureProjNetId, spellNetId);
    stats->setCurrentMana(stats->getCurrentMana() - (s->getCost() * (1 - stats->getSpellCostReduction())));
    return s;
@@ -112,14 +113,14 @@ Spell* Champion::levelUpSpell(uint8 slot) {
    if(slot >= spells.size()) {
       return 0;
    }
-   
+
    if(skillPoints == 0) {
       return 0;
    }
-   
+
    spells[slot]->levelUp();
    --skillPoints;
-   
+
    return spells[slot];
 }
 
@@ -217,7 +218,9 @@ void Champion::levelUp() {
 std::pair<float, float> Champion::getRespawnPosition() {
    LuaScript configScript(false);
    //get map ID
-   configScript.loadScript("../../lua/config.lua");
+   //configScript.loadScript("../../lua/config.lua");
+    configScript.loadScript(Config::instance().getluaconfig());
+
    sol::table gameTable = configScript.getTable("game");
    sol::table playersTable = configScript.getTable("players");
    uint32 mapId = gameTable.get<int>("map");
@@ -264,81 +267,81 @@ std::pair<float, float> Champion::getRespawnPosition() {
    catch (sol::error e) {
       CORE_INFO("Error loading champion for %s", e.what());
    }
-   
+
    teamSizeSpawners = teamSpawners.get<sol::table>(to_string(teamSize));
    return std::make_pair(teamSizeSpawners.get<float>("player" + to_string(spawnNumber) + "X"), teamSizeSpawners.get<float>("player" + to_string(spawnNumber) + "Y"));
 }
 void Champion::die(Unit* killer) {
    respawnTimer = 5000000 + getStats().getLevel()*2500000;
    map->stopTargeting(this);
-   
+
    Champion* cKiller = dynamic_cast<Champion*>(killer);
-   
+
 	if(!cKiller && this->championHitFlagTimer > 0){
       cKiller = dynamic_cast<Champion*>(map->getObjectById(this->playerHitId));
       CORE_INFO("Killed by turret, minion or monster, but still  give gold to the enemy.");
    }
-   
+
    if (!cKiller) {
       map->getGame()->notifyChampionDie(this, killer, 0);
       return;
    }
-   
+
    cKiller->setChampionGoldFromMinions(0);
-   
+
    float gold = map->getGoldFor(this);
    CORE_INFO("Before: getGoldFromChamp: %f Killer: %i Victim: %i", gold, cKiller->killDeathCounter,this->killDeathCounter);
-   
+
    if(cKiller->killDeathCounter < 0){
       cKiller->killDeathCounter = 0;
    }
-   
+
    if(cKiller->killDeathCounter >= 0){
       cKiller->killDeathCounter += 1;
    }
-   
+
    if(this->killDeathCounter > 0){
       this->killDeathCounter = 0;
    }
-   
+
    if(this->killDeathCounter <= 0){
       this->killDeathCounter -= 1;
    }
-    
+
    if(!gold) {
       map->getGame()->notifyChampionDie(this, cKiller, 0);
       return;
    }
-    
+
    if(map->getKillReduction() && !map->getFirstBlood()){
       gold -= gold*0.25f;
       //CORE_INFO("Still some minutes for full gold reward on champion kills");
    }
-   
+
    if(map->getFirstBlood()){
       gold += 100;
       map->setFirstBlood(false);
    }
 
    map->getGame()->notifyChampionDie(this, cKiller, gold);
-   
+
 	cKiller->getStats().setGold(cKiller->getStats().getGold() + gold);
 	map->getGame()->notifyAddGold(cKiller, this, gold);
-   
+
    //CORE_INFO("After: getGoldFromChamp: %f Killer: %i Victim: %i", gold, cKiller->killDeathCounter,this->killDeathCounter);
-   
+
    map->stopTargeting(this);
 }
 
 void Champion::dealDamageTo(Unit* target, float damage, DamageType type, DamageSource source) {
    Unit::dealDamageTo(target,damage,type,source);;
-   
+
    Champion* cTarget = dynamic_cast<Champion*>(target);
-   
+
    if (!cTarget) {
       return;
    }
-   
+
    cTarget->setChampionHitFlagTimer(15*1000000); //15 seconds timer, so when you get executed the last enemy champion who hit you gets the gold
    cTarget->playerHitId = this->id;
    //CORE_INFO("15 second execution timer on you. Do not get killed by a minion, turret or monster!");
@@ -348,8 +351,8 @@ void Champion::dealDamageTo(Unit* target, float damage, DamageType type, DamageS
 int Champion::getTeamSize(){
    LuaScript script(false);
 
-   script.loadScript("../../lua/config.lua");
-
+   //script.loadScript("../../lua/config.lua");
+   script.loadScript(Config::instance().getluaconfig());
    //  sol::state lua;
    //  lua.open_libraries(sol::lib::base, sol::lib::table);
 
