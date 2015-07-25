@@ -8,5 +8,4 @@ end
 
 function onAutoAttack(us, target)
     print("We just auto attacked!")
-	dealMagicalDamage(getEffectValue(3) + (3 + getOwnerLevel))
 end
