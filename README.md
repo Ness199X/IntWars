@@ -1,3 +1,6 @@
+I copy pasterino
+I have no knowledge of coding but Il give it a shot
+==================
 IntWars
 ==================
 DISCLAIMER: This is for development purposes only, this is not a finished project - and should not be used in a production enviroment.
