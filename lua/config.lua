@@ -46,5 +46,7 @@ game = {
 12 	- 	Howling Abyss
 11 	- 	New Summoner's Rift (only on the PBE client)
 --]]
-	["map"] = 1
+	["map"] = 1,
+	["port"] = 5119,
+	["server_key"] = "17BLOhi6KZsTtldTsizvHg=="
 }
