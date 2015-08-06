@@ -9,3 +9,6 @@ end
 function onAutoAttack(us, target)
     print("We just auto attacked!")
 end
+
+function onDealDamage(target, damage, damageType, source)
+end

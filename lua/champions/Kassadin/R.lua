@@ -13,7 +13,7 @@ function finishCasting()
         trueCoords = Vector2:new(getSpellToX(), getSpellToY())
     end
 
-    addParticle("Kassadin_Base_R_vanish.troy", getOwnerX(), getOwnerY());
+    --addParticle("Kassadin_Base_R_vanish.troy", getOwnerX(), getOwnerY());
     teleportTo(trueCoords.x, trueCoords.y)
     addParticle("Kassadin_Base_R_appear.troy", getOwnerX(), getOwnerY())
 end

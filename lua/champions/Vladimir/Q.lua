@@ -3,13 +3,13 @@ Vector2 = require 'Vector2' -- include 2d vector lib
 function finishCasting()
 	local castTarget = getCastTarget()
 	local current = Vector2:new(getOwnerX(), getOwnerY())
-	if current:distance(Vector2:new(castTarget:getX(), castTarget:getY())) <= 125 then	
+	if current:distance(Vector2:new(castTarget:getX(), castTarget:getY())) <= 600 then	
 		print(getEffectValue(0))
 		print(getEffectValue(1))
 		local owner = getOwner();
-		owner:dealDamageTo( castTarget, getEffectValue(0), DAMAGE_TYPE_TRUE, DAMAGE_SOURCE_SPELL );		
+		owner:dealDamageTo( castTarget, getEffectValue(0) + owner:getStats():getTotalAp()*0.6, DAMAGE_TYPE_TRUE, DAMAGE_SOURCE_SPELL );		
 		
-		local newHealth = owner:getStats():getCurrentHealth() + getEffectValue(1) + owner:getStats():getTotalAp()*0.75
+		local newHealth = owner:getStats():getCurrentHealth() + getEffectValue(1) + owner:getStats():getTotalAp()*0.25
     	local maxHealth = owner:getStats():getMaxHealth()    
     	if newHealth >= maxHealth then
 			owner:getStats():setCurrentHealth(maxHealth)

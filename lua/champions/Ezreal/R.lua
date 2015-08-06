@@ -6,7 +6,7 @@ function finishCasting()
     local range = to * 99999
     local trueCoords = current + range
 
-    addProjectile(trueCoords.x, trueCoords.y)
+    addProjectile(trueCoords.x, trueCoords.y)	
 end
 
 function applyEffects()

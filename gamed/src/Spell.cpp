@@ -132,6 +132,10 @@ std::string Spell::getStringForSlot(){
             return "E";
         case 3:
             return "R";
+		case 4:
+			return "D";
+		case 5:
+			return "F";
     }
     
     return "undefined";
@@ -141,8 +145,13 @@ std::string Spell::getStringForSlot(){
 
 
 void Spell::loadLua(LuaScript& script){
-
-   std::string scriptloc = "../../lua/champions/" + owner->getType() + "/" + getStringForSlot() + ".lua"; //lua/championname/(q/w/e/r), example: /lua/Ezreal/q, also for stuff like nidalee cougar they will have diff folders!
+   std::string scriptloc;
+   
+   if (getSlot() > 3) {
+      scriptloc = "../../lua/summonerSpells/" + spellName + ".lua";
+   } else {
+      scriptloc = "../../lua/champions/" + owner->getType() + "/" + getStringForSlot() + ".lua"; //lua/championname/(q/w/e/r), example: /lua/Ezreal/q, also for stuff like nidalee cougar they will have diff folders!
+   }
 
    CORE_INFO("Spell script loc is: %s" , scriptloc.c_str());
    
@@ -167,6 +176,10 @@ void Spell::loadLua(LuaScript& script){
    });
    script.lua.set_function("isWalkable", [this](float _x, float _y) {
       return owner->getMap()->isWalkable(_x, _y);
+   });
+   script.lua.set_function("getClosestTerrainExit", [this](Unit* u, float x, float y, bool noForward) {
+	  Vector2 location = Vector2(x, y);
+      return std::make_tuple(owner->getMap()->getAIMesh()->getClosestTerrainExit(u, location, noForward).X, owner->getMap()->getAIMesh()->getClosestTerrainExit(u, location, noForward).Y);
    });
    
    /*script.lua.set_function("addMovementSpeedBuff", [this](Unit* u, float amount, float duration) { // expose teleport to lua
