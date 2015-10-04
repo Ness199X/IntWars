@@ -7,15 +7,25 @@
 #include "LuaScript.h"
 #include "Logger.h"
 
-
 using namespace std;
 
 Spell::Spell(Champion* owner, const std::string& spellName, uint8 slot) : owner(owner), spellName(spellName), level(0), slot(slot), range(0), state(STATE_READY), currentCooldown(0), currentCastTime(0), castTime(0.f), castRange(1000.f), projectileSpeed(2000.f), flags(0), projectileFlags(0) {
+	//If summoner
+	
+	std::vector<unsigned char> iniFile;
+	if(slot > 3) {
+		if(!RAFManager::getInstance()->readFile("DATA/Spells/"+spellName+".inibin", iniFile)) {
+			return;
+		}
+		Inibin inibin(iniFile);
+		cooldown.fill(1.f);
+		
+		return;
+	}
    
    cooldown.fill(1.f);
    cost.fill(1.f);
 
-   std::vector<unsigned char> iniFile;
    if(!RAFManager::getInstance()->readFile("DATA/Spells/"+spellName+".inibin", iniFile)) {
       if(!RAFManager::getInstance()->readFile("DATA/Characters/"+owner->getType()+"/Spells/"+spellName+".inibin", iniFile)) {
          if(!RAFManager::getInstance()->readFile("DATA/Characters/"+owner->getType()+"/"+spellName+".inibin", iniFile)) {
@@ -31,6 +41,11 @@ Spell::Spell(Champion* owner, const std::string& spellName, uint8 slot) : owner(
    for(int i = 0; i < cooldown.size(); ++i) {
       char c = '0'+i+1;
       cooldown[i] = inibin.getFloatValue("SpellData", string("Cooldown")+c);
+   }
+   
+   for(int i = 0; i < cost.size(); ++i) {
+      char c = '0'+i+1;
+      cost[i] = inibin.getFloatValue("SpellData", string("ManaCost")+c);
    }
 
    castTime = ((1.f+inibin.getFloatValue("SpellData", "DelayCastOffsetPercent")))/2.f;
@@ -86,7 +101,6 @@ Spell::Spell(Champion* owner, const std::string& spellName, uint8 slot) : owner(
    projectileFlags = projectile.getIntValue("SpellData", "Flags");
 }
 
-
 /**
  * Called when the character casts the spell
  */
@@ -114,11 +128,16 @@ bool Spell::cast(float x, float y, Unit* u, uint32 futureProjNetId, uint32 spell
  * such as projectile spawning, etc.
  */
 void Spell::finishCasting() {
-
-   doLua();
-   
-   state = STATE_COOLDOWN;
-   currentCooldown = getCooldown();
+	doLua();
+	   
+	state = STATE_COOLDOWN;
+	currentCooldown = getCooldown();
+	
+	if(getSlot() < 4)
+	{
+		owner->getStats().setCurrentMana(owner->getStats().getCurrentMana()-cost.at(getLevel()-1));
+		owner->getMap()->getGame()->notifySetCooldown(owner, getSlot(), cooldown.at(getLevel()-1), cooldown.at(getLevel()-1));
+	}
 }
 
 std::string Spell::getStringForSlot(){
@@ -132,42 +151,55 @@ std::string Spell::getStringForSlot(){
             return "E";
         case 3:
             return "R";
+		case 4:
+			return "D";
+		case 5:
+			return "F";
     }
     
     return "undefined";
-    
 }
 
 
 
 void Spell::loadLua(LuaScript& script){
 
-   std::string scriptloc = "../../lua/champions/" + owner->getType() + "/" + getStringForSlot() + ".lua"; //lua/championname/(q/w/e/r), example: /lua/Ezreal/q, also for stuff like nidalee cougar they will have diff folders!
-
-   CORE_INFO("Spell script loc is: %s" , scriptloc.c_str());
+	std::string scriptloc;
    
-   script.lua.script("package.path = '../../lua/lib/?.lua;' .. package.path"); //automatically load vector lib so scripters dont have to worry about path
-   script.lua.set_function("getOwnerX", [this]() { return owner->getX(); });
-   script.lua.set_function("getOwnerY", [this]() { return owner->getY(); });
-   script.lua.set_function("getSpellLevel", [this]() { return getLevel(); });
-   script.lua.set_function("getOwnerLevel", [this]() { return owner->getStats().getLevel(); });
-   script.lua.set_function("getChampionModel", [this]() { return owner->getModel(); });
-   script.lua.set_function("getCastTarget", [this]() { return this->target; });
+	if (getSlot() > 3) {
+		scriptloc = "../../lua/summonerSpells/" + spellName + ".lua";
+ 	} else {
+		scriptloc = "../../lua/champions/" + owner->getType() + "/" + getStringForSlot() + ".lua"; //lua/championname/(q/w/e/r), example: /lua/Ezreal/q, also for stuff like nidalee cougar they will have diff folders!
+	}
+	CORE_INFO("Spell script loc is: %s" , scriptloc.c_str());
    
-   script.lua.set_function("setChampionModel", [this](const std::string& newModel) {
-      owner->setModel(newModel); 
-      return;
-   });
-   script.lua.set_function("getSpellToX", [this]() { return x; });
-   script.lua.set_function("getSpellToY", [this]() { return y; });
-   script.lua.set_function("getRange", [this]() { return castRange; });
-   script.lua.set_function("teleportTo", [this](float _x, float _y) { // expose teleport to lua
-      owner->getMap()->getGame()->notifyTeleport(owner, _x, _y);
-      return;
-   });
-   script.lua.set_function("isWalkable", [this](float _x, float _y) {
-      return owner->getMap()->isWalkable(_x, _y);
-   });
+	script.lua.script("package.path = '../../lua/lib/?.lua;' .. package.path"); //automatically load vector lib so scripters dont have to worry about path
+	script.lua.set_function("getOwnerX", [this]() { return owner->getX(); });
+	script.lua.set_function("getOwnerY", [this]() { return owner->getY(); });
+	script.lua.set_function("getSpellLevel", [this]() { return getLevel(); });
+	script.lua.set_function("getOwnerLevel", [this]() { return owner->getStats().getLevel(); });
+	script.lua.set_function("getChampionModel", [this]() { return owner->getModel(); });
+	script.lua.set_function("getCastTarget", [this]() { return this->target; });
+   
+	script.lua.set_function("setChampionModel", [this](const std::string& newModel) {
+		owner->setModel(newModel); 
+		return;
+	});
+	script.lua.set_function("getSpellToX", [this]() { return x; });
+	script.lua.set_function("getSpellToY", [this]() { return y; });
+	script.lua.set_function("getRange", [this]() { return castRange; });
+	script.lua.set_function("teleportTo", [this](float _x, float _y) { // expose teleport to lua
+		owner->getMap()->getGame()->notifyTeleport(owner, _x, _y);
+		return;
+	});
+	script.lua.set_function("isWalkable", [this](float _x, float _y) {
+		return owner->getMap()->isWalkable(_x, _y);
+	});
+	
+	script.lua.set_function("getClosestTerrainExit", [this](Unit* u, float x, float y, bool noForward) {
+		Vector2 location = Vector2(x, y);
+		return std::make_tuple(owner->getMap()->getAIMesh()->getClosestTerrainExit(u, location, noForward).X, owner->getMap()->getAIMesh()->getClosestTerrainExit(u, location, noForward).Y);
+	});
    
    /*script.lua.set_function("addMovementSpeedBuff", [this](Unit* u, float amount, float duration) { // expose teleport to lua
        Buff* b = new Buff(duration);
@@ -177,120 +209,120 @@ void Spell::loadLua(LuaScript& script){
       return;
    });*/
    
-   script.lua.set_function("addBuff", [this](Buff b, Unit* u){
-      u->addBuff(new Buff(b));
-      return;
-   });
+	script.lua.set_function("addBuff", [this](Buff b, Unit* u){
+		u->addBuff(new Buff(b));
+		return;
+	});
    
-   script.lua.set_function("getEffectValue", [this](uint32 effectNo) {
-      if(effectNo >= effects.size() || level >= effects[effectNo].size()) {
-         return 0.f;
-      }
-      return effects[effectNo][level];
-   });
+	script.lua.set_function("getEffectValue", [this](uint32 effectNo) {
+		if(effectNo >= effects.size() || level >= effects[effectNo].size()) {
+			return 0.f;
+		}
+		return effects[effectNo][level];
+	});
    
-   script.lua.set_function("getOwner", [this]() { return owner; });
+	script.lua.set_function("getOwner", [this]() { return owner; });
    
-   script.lua.set_function("getTeam", [this](Object* o) { return o->getTeam(); });
-   script.lua.set_function("isDead", [this](Unit* u) { return u->isDead(); });
+	script.lua.set_function("getTeam", [this](Object* o) { return o->getTeam(); });
+	script.lua.set_function("isDead", [this](Unit* u) { return u->isDead(); });
    
-   script.lua.set_function("getProjectileSpeed", [this]() { return projectileSpeed; });
-   script.lua.set_function("getCoefficient", [this]() { return coefficient; });
+	script.lua.set_function("getProjectileSpeed", [this]() { return projectileSpeed; });
+	script.lua.set_function("getCoefficient", [this]() { return coefficient; });
    
-   script.lua.set_function("addProjectile", [this](float toX, float toY) { 
-      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, new Target(toX, toY), this, projectileSpeed, RAFFile::getHash(spellName +"Missile"), projectileFlags ? projectileFlags : flags);
-      owner->getMap()->addObject(p);
-      owner->getMap()->getGame()->notifyProjectileSpawn(p);
+	script.lua.set_function("addProjectile", [this](float toX, float toY) { 
+		Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, new Target(toX, toY), this, projectileSpeed, RAFFile::getHash(spellName +"Missile"), projectileFlags ? projectileFlags : flags);
+		owner->getMap()->addObject(p);
+		owner->getMap()->getGame()->notifyProjectileSpawn(p);
 
-      return;
-   });
+		return;
+	});
    
-   script.lua.set_function("addProjectileTarget", [this](Target *t) { 
-      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, t, this, projectileSpeed, RAFFile::getHash(spellName +"Missile"), projectileFlags ? projectileFlags : flags);
-      owner->getMap()->addObject(p);
-      owner->getMap()->getGame()->notifyProjectileSpawn(p);
+	script.lua.set_function("addProjectileTarget", [this](Target *t) { 
+		Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, t, this, projectileSpeed, RAFFile::getHash(spellName +"Missile"), projectileFlags ? projectileFlags : flags);
+		owner->getMap()->addObject(p);
+		owner->getMap()->getGame()->notifyProjectileSpawn(p);
 
-      return;
-   });
+		return;
+	});
    
-   script.lua.set_function("addProjectileCustom", [this](const std::string& name, float projSpeed, float toX, float toY) { 
-      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, new Target(toX, toY), this, projectileSpeed, RAFFile::getHash(name), projectileFlags ? projectileFlags : flags);
-      owner->getMap()->addObject(p);
-      owner->getMap()->getGame()->notifyProjectileSpawn(p);
+	script.lua.set_function("addProjectileCustom", [this](const std::string& name, float projSpeed, float toX, float toY) { 
+		Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, new Target(toX, toY), this, projectileSpeed, RAFFile::getHash(name), projectileFlags ? projectileFlags : flags);
+		owner->getMap()->addObject(p);
+		owner->getMap()->getGame()->notifyProjectileSpawn(p);
 
-      return;
-   });
+		return;
+	});
    
-   script.lua.set_function("addProjectileTargetCustom", [this](const std::string& name, float projSpeed, Target *t) { 
-      Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, t, this, projectileSpeed, RAFFile::getHash(name), projectileFlags ? projectileFlags : flags);
-      owner->getMap()->addObject(p);
-      owner->getMap()->getGame()->notifyProjectileSpawn(p);
+	script.lua.set_function("addProjectileTargetCustom", [this](const std::string& name, float projSpeed, Target *t) { 
+		Projectile* p = new Projectile(owner->getMap(), GetNewNetID(), owner->getX(), owner->getY(), lineWidth, owner, t, this, projectileSpeed, RAFFile::getHash(name), projectileFlags ? projectileFlags : flags);
+		owner->getMap()->addObject(p);
+		owner->getMap()->getGame()->notifyProjectileSpawn(p);
 
-      return;
-   });
+		return;
+	});
    
    /**
     * For spells that don't require SpawnProjectile, but for which we still need to track the projectile server-side
     */
-   script.lua.set_function("addServerProjectile", [this](float toX, float toY) { 
-      Projectile* p = new Projectile(owner->getMap(), futureProjNetId, owner->getX(), owner->getY(), lineWidth, owner, new Target(toX, toY), this, projectileSpeed, 0, projectileFlags ? projectileFlags : flags);
-      owner->getMap()->addObject(p);
+	script.lua.set_function("addServerProjectile", [this](float toX, float toY) { 
+		Projectile* p = new Projectile(owner->getMap(), futureProjNetId, owner->getX(), owner->getY(), lineWidth, owner, new Target(toX, toY), this, projectileSpeed, 0, projectileFlags ? projectileFlags : flags);
+		owner->getMap()->addObject(p);
 
-      return;
-   });
+		return;
+	});
    
-   script.lua.set_function("addParticle", [this](const std::string& particle, float toX, float toY) { 
-      Target* t = new Target(toX, toY);
-      owner->getMap()->getGame()->notifyParticleSpawn(owner, t, particle);
-      delete t;
-      return;
-   });
+	script.lua.set_function("addParticle", [this](const std::string& particle, float toX, float toY) { 
+		Target* t = new Target(toX, toY);
+		owner->getMap()->getGame()->notifyParticleSpawn(owner, t, particle);
+		delete t;
+		return;
+	});
    
    script.lua.set_function("addParticleTarget", [this](const std::string& particle, Target* u) { 
       owner->getMap()->getGame()->notifyParticleSpawn(owner, u, particle);
       return;
    });
    
-   script.lua.set_function("spellAnimation", [this](const std::string& animation, Unit* u) { 
-      owner->getMap()->getGame()->notifySpellAnimation(u, animation);
-      return;
-   });
+	script.lua.set_function("spellAnimation", [this](const std::string& animation, Unit* u) { 
+		owner->getMap()->getGame()->notifySpellAnimation(u, animation);
+		return;
+	});
 
-   // TODO: Set multiple animations
-   script.lua.set_function("setAnimation", [this](const std::string& animation1, const std::string& animation2, Unit* u) {
-      std::vector<std::pair<std::string, std::string>> animationPairs;
-      animationPairs.push_back(std::make_pair(animation1, animation2));
+	// TODO: Set multiple animations
+	script.lua.set_function("setAnimation", [this](const std::string& animation1, const std::string& animation2, Unit* u) {
+		std::vector<std::pair<std::string, std::string>> animationPairs;
+		animationPairs.push_back(std::make_pair(animation1, animation2));
 
-      owner->getMap()->getGame()->notifySetAnimation(u, animationPairs);
-      return;
-   });
+		owner->getMap()->getGame()->notifySetAnimation(u, animationPairs);
+		return;
+	});
 
-   script.lua.set_function("resetAnimations", [this](Unit* u) {
-      std::vector<std::pair<std::string, std::string>> animationPairs;
-      owner->getMap()->getGame()->notifySetAnimation(u, animationPairs);
-      return;
-   });
+	script.lua.set_function("resetAnimations", [this](Unit* u) {
+		std::vector<std::pair<std::string, std::string>> animationPairs;
+		owner->getMap()->getGame()->notifySetAnimation(u, animationPairs);
+		return;
+	});
 
-   script.lua.set_function("dashTo", [this](Unit* u, float x, float y, float dashSpeed) {
-      u->dashTo(x, y, dashSpeed);
-      u->setTargetUnit(0);
-      owner->getMap()->getGame()->notifyDash(u, x, y, dashSpeed);
-      return;
-   });
+	script.lua.set_function("dashTo", [this](Unit* u, float x, float y, float dashSpeed) {
+		u->dashTo(x, y, dashSpeed);
+		u->setTargetUnit(0);
+		owner->getMap()->getGame()->notifyDash(u, x, y, dashSpeed);
+		return;
+	});
 
-   script.lua.set_function("getUnitsInRange", [this](Target* t, float range, bool isAlive) {
-      return owner->getMap()->getUnitsInRange(t, range, isAlive);
-   });
+	script.lua.set_function("getUnitsInRange", [this](Target* t, float range, bool isAlive) {
+		return owner->getMap()->getUnitsInRange(t, range, isAlive);
+	});
 
-   script.lua.set_function("getChampionsInRange", [this](Target* t, float range, bool isAlive) {
-      return owner->getMap()->getChampionsInRange(t, range, isAlive);
-   });
+	script.lua.set_function("getChampionsInRange", [this](Target* t, float range, bool isAlive) {
+		return owner->getMap()->getChampionsInRange(t, range, isAlive);
+	});
 
-   try{
-      script.loadScript(scriptloc); //todo: abstract class that loads a lua file for any lua
-     }catch(sol::error e){//lua error? don't crash the whole server
-       CORE_ERROR("Error in spell script: %s", e.what());
-   }
+	try{
+		script.loadScript(scriptloc); //todo: abstract class that loads a lua file for any lua
+		}catch(sol::error e){//lua error? don't crash the whole server
+		CORE_ERROR("Error in spell script: %s", e.what());
+	}
 }
 
 void Spell::doLua(){
@@ -316,7 +348,6 @@ void Spell::update(int64 diff) {
    case STATE_READY:
       return;
    case STATE_CASTING:
-       
       currentCastTime -= diff/1000000.f;
       if(currentCastTime <= 0) {
          finishCasting();

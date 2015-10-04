@@ -148,7 +148,7 @@ bool Game::handleSpawn(ENetPeer *peer, ENetPacket *packet) {
       sendPacket(peer, info, CHL_S2C);
 
       p->getChampion()->getStats().setSummonerSpellEnabled(0, true);
-      p->getChampion()->getStats().setSummonerSpellEnabled(1, true);
+      p->getChampion()->getStats().setSummonerSpellEnabled(1, false);
 
       // TODO: Recall slot
    }
@@ -420,11 +420,11 @@ bool Game::handleCastSpell(HANDLE_ARGS) {
    CastSpell *spell = reinterpret_cast<CastSpell *>(packet->data);
 
    // There are some bits triggering this
-   if (spell->spellSlotType & 0x0F > 0) {
+   /*if (spell->spellSlotType & 0x0F > 0) {
       CORE_INFO("Summoner Spell Cast");
       CORE_INFO("Type: 0x%X, Slot %d, coord %f ; %f, coord2 %f, %f, target NetId %08X", spell->spellSlotType, spell->spellSlot, spell->x, spell->y, spell->x2, spell->y2, spell->targetNetId);
       return true;
-   }
+   }*/
 
    CORE_INFO("Spell Cast : Type: 0x%X, Slot %d, coord %f ; %f, coord2 %f, %f, target NetId %08X", spell->spellSlotType, spell->spellSlot, spell->x, spell->y, spell->x2, spell->y2, spell->targetNetId);
 

@@ -261,7 +261,7 @@ Vector2 AIMesh::getClosestTerrainExit(Object* a, Vector2 location, bool noForwar
       dist = (distBackwards < distForward) ? (-distBackwards) : (distForward);
    }
 
-   return a->getPosition() + (dir.Normalize()*dist);
+   return location + (dir.Normalize()*dist);
 }
 
 

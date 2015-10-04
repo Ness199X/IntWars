@@ -1,6 +1,6 @@
 function finishCasting()
     local speedIncrease = 7 + getSpellLevel()
-    local buff = Buff.new("BloodBoil", 12.0, BUFFTYPE_TEMPORARY, getOwner())
+    local buff = Buff.new("ToxicShot", 12.0, BUFFTYPE_TEMPORARY, getOwner())
     
     print("Speed increase" .. speedIncrease)
     

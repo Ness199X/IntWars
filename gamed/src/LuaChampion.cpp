@@ -50,6 +50,7 @@ void LuaScript::addChampion() {
             "getBaseAttackSpeed", &Stats::getBaseAttackSpeed,
             "getAttackSpeedMultiplier", &Stats::getAttackSpeedMultiplier,
             "getGold", &Stats::getGold,
+			"setGold", &Stats::setGold,
             "getGoldPerSecond", &Stats::getGoldPerSecond,
             "getLevel", &Stats::getLevel,
             "setCritChance", &Stats::setCritChance,
