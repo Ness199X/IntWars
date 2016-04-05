@@ -25,8 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Pathfinder.h"
 
 #define SERVER_HOST ENET_HOST_ANY 
-#define SERVER_PORT 5119
-#define SERVER_KEY "17BLOhi6KZsTtldTsizvHg=="
+#define SERVER_PORT_DEFAULT 5119
+#define SERVER_KEY_DEFAULT "17BLOhi6KZsTtldTsizvHg=="
 
 #define SERVER_VERSION "0.2.0"
 
@@ -51,11 +51,22 @@ int main(int argc, char ** argv)
 	Game g;
 	ENetAddress address;
 	address.host = SERVER_HOST;
-	address.port = SERVER_PORT;
-
-   if (!g.initialize(&address, SERVER_KEY)) {
-      CORE_ERROR("Couldn't listen on port %d, or invalid key", SERVER_PORT);
-      return EXIT_FAILURE;
+   if (argc > 1) {
+      enet_uint16 port = atoi(argv[1]);
+      address.port = port;
+   } else {
+      address.port = SERVER_PORT_DEFAULT;
+   }
+   if (argc > 2) {
+      if (!g.initialize(&address, argv[2])) {
+         CORE_ERROR("Couldn't listen on port %d, or invalid key", &address);
+         return EXIT_FAILURE;
+      }
+   } else {
+      if (!g.initialize(&address, SERVER_KEY_DEFAULT)) {
+         CORE_ERROR("Couldn't listen on port %d, or invalid key", &address);
+         return EXIT_FAILURE;
+      }
    }
 
 	g.netLoop();

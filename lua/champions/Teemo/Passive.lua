@@ -1,5 +1,4 @@
 function onUpdate(diff)
-    --print("Onupdate")
 end
 
 function onDamageTaken(attacker, damage, dmgType, source) --todo add callbacks for these 

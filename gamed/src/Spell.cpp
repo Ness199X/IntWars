@@ -169,13 +169,13 @@ void Spell::loadLua(LuaScript& script){
       return owner->getMap()->isWalkable(_x, _y);
    });
    
-   /*script.lua.set_function("addMovementSpeedBuff", [this](Unit* u, float amount, float duration) { // expose teleport to lua
-       Buff* b = new Buff(duration);
+   script.lua.set_function("addMovementSpeedBuff", [this](Unit* u, float amount, float duration) { // expose teleport to lua
+       Buff* b = new Buff("", duration, BUFFTYPE_TEMPORARY, u);
        b->setMovementSpeedPercentModifier(amount);
        u->addBuff(b);
        u->getStats().addMovementSpeedPercentageModifier(b->getMovementSpeedPercentModifier());
       return;
-   });*/
+   });
    
    script.lua.set_function("addBuff", [this](Buff b, Unit* u){
       u->addBuff(new Buff(b));

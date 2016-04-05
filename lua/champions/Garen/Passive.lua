@@ -1,13 +1,11 @@
-function finishCasting()
-    local duration = 0.75 + getSpellLevel() * 0.75
-
-    print("Speed increase 35")
-
-    local buff = Buff.new("", duration, getOwner())
-
-    buff:setMovementSpeedPercentModifier(35)
-    addBuff(buff) -- The server does not load Garen's stats
+function onUpdate(diff)
 end
 
-function applyEffects()
+function onDamageTaken(attacker, damage, dmgType, source)
+end
+
+function onAutoAttack(target)
+end
+
+function onDealDamage(target, damage, damageType, source)
 end
