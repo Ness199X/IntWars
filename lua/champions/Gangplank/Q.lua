@@ -2,7 +2,13 @@ Vector2 = require 'Vector2' -- include 2d vector lib
 
 function finishCasting()
 	local castTarget = getCastTarget()
-    addProjectileTargetCustom( "pirate_parley_tar.troy", 0, castTarget )
+	local current = Vector2:new(getOwnerX(), getOwnerY())
+	if current:distance(Vector2:new(castTarget:getX(), castTarget:getY())) <= 625 then	
+		addProjectileTargetCustom( "pirate_parley_tar.troy", 0, castTarget )
+	else
+		print("Target is too far away")
+	end
+	
 end
 
 function applyEffects()

@@ -1,16 +1,18 @@
-Vector2 = require 'Vector2'
+Vector2 = require 'Vector2' -- include 2d vector lib
 
 function finishCasting()
-	local current = Vector2:new(getOwnerX(), getOwnerY())
-	local to = (Vector2:new(getSpellToX(), getSpellToY()) - current):normalize()
-	local range = to * 900
-	local trueCoords = current + range
-	addServerProjectile(trueCoords.x, trueCoords.y)
+    local current = Vector2:new(getOwnerX(), getOwnerY())
+    local to = (Vector2:new(getSpellToX(), getSpellToY()) - current):normalize()
+    local range = to * 1000
+    local trueCoords = current + range
+
+    addProjectile(trueCoords.x, trueCoords.y)
 end
 
 function applyEffects()
-	dealMagicalDamage(getEffectValue(0))
-	-- addParticleTarget("dr_mundo_infected_cleaver_tar.troy", getTarget()) not visible, dk where to find this
-	destroyProjectile()
-	-- add slow
+    dealPhysicalDamage(max(getEffectValue(0), getCastTarget():getStats():getCurrentHealth()))
+	local buff = Buff.new("", 2.0, BUFFTYPE_TEMPORARY, getCastTarget(), getOwner())
+    buff:setMovementSpeedPercentModifier(40)
+    addBuff(buff, getCastTarget())
+    destroyProjectile()
 end

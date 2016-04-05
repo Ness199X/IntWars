@@ -111,7 +111,7 @@ std::string RAFManager::findGameBasePath()
    //Check CURRENT_USER keys
    for (size_t i = 0; i < strKeyPathCU.size(); i++)
    {
-      if (RegOpenKeyExA(HKEY_CURRENT_USER, strKeyPathCU[i].c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
+      if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, strKeyPathCU[i].c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
       {
          //CORE_WARNING("Cannot open key HKEY_CURRENT_USER '%s'", strKeyPathCU[i].c_str());
          continue;

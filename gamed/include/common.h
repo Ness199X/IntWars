@@ -64,8 +64,8 @@ enum PacketCmd : uint8
    PKT_S2C_HeroSpawn = 0x4C,
 
    // Packet 0xC0 format is [Net ID 1] [Net ID 2], purpose still unknown
-   PKT_S2C_GameTimer = 0xC1,
-   PKT_S2C_GameTimerUpdate = 0xC2,
+   PKT_S2C_GameTimer = 0xC0,
+   PKT_S2C_GameTimerUpdate = 0xC1,
 
    PKT_S2C_FaceDirection = 0x50,
    PKT_S2C_LeaveVision = 0x51,
