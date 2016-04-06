@@ -13,6 +13,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "stdafx.h"
+#include "Config.h"
 #include "Game.h"
 #include "Packets.h"
 #include "ItemManager.h"
@@ -23,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <string>
 #include <sstream>
+
+
 
 using namespace std;
 
@@ -76,7 +79,7 @@ bool Game::handleSynch(ENetPeer *peer, ENetPacket *packet) {
    //Logging->writeLine("Client version: %s", version->version);
    //Gets the map from the lua configuration file.
    LuaScript script(false);
-   script.loadScript("../../lua/config.lua");
+   script.loadScript(Config::instance().getluaconfig());
    sol::table config = script.getTable("game");
    int mapId = config.get<int>("map");
    CORE_INFO("Current map: %i", mapId);
