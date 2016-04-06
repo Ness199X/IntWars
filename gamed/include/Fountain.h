@@ -3,6 +3,7 @@
 
 #define NUM_SIDES 2 // Change implementation when more game-modes with more teams are available
 #define PERCENT_MAX_HEALTH_HEAL .15
+#define PERCENT_MAX_MANA_HEAL .15
 
 #include <vector>
 

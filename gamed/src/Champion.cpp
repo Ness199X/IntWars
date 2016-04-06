@@ -48,8 +48,9 @@ Champion::Champion(const std::string& type, Map* map, uint32 id, uint32 playerId
    spells.push_back(new Spell(this, inibin.getStringValue("Data", "Spell2"), 1));
    spells.push_back(new Spell(this, inibin.getStringValue("Data", "Spell3"), 2));
    spells.push_back(new Spell(this, inibin.getStringValue("Data", "Spell4"), 3));
-   spells.push_back(new Spell(this, "HEAL", 4)); // Name hardcoded, couldn't get the string without making a mess in the code
-   spells.push_back(new Spell(this, "FLASH", 5)); // same as above
+   spells.push_back(new Spell(this, "SummonerHeal", 4));
+   spells.push_back(new Spell(this, "SummonerFlash", 5));
+   spells.push_back(new Spell(this, "Recall", 6));
    setMelee(inibin.getBoolValue("DATA", "IsMelee"));
    setCollisionRadius(inibin.getIntValue("DATA", "PathfindingCollisionRadius"));
 

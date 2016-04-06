@@ -22,6 +22,12 @@
 #ifndef SOL_ERROR_HPP
 #define SOL_ERROR_HPP
 
+#ifndef _MSC_VER
+#define NOEXCEPT noexcept
+#else
+#define NOEXCEPT
+#endif
+
 #include <stdexcept>
 #include <string>
 

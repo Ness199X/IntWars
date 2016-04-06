@@ -22,6 +22,12 @@
 #ifndef SOL_TYPES_HPP
 #define SOL_TYPES_HPP
 
+#ifndef _MSC_VER
+#define NOEXCEPT noexcept
+#else
+#define NOEXCEPT
+#endif
+
 #include <lua.hpp>
 #include <string>
 #include "traits.hpp"

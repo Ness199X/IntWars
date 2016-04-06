@@ -11,7 +11,7 @@ Turret::Turret(Map* map, uint32 id, const std::string& name, float x, float y, f
    stats->setBaseAd(ad);
    stats->setRange(TURRET_RANGE);
    
-   autoAttackDelay = 4.95f/30.f;
+   autoAttackDelay = 4.35f/30.f;
    autoAttackProjectileSpeed = 1200.f;
    
    setTeam(team);

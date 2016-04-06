@@ -25,6 +25,15 @@ void Fountain::healChampions(Map* map, long long diff) {
                   c->getStats().setCurrentHealth(MaxHP);
                   CORE_INFO("Fully healed at fountain");
                }
+			   
+			   float Mana = c->getStats().getCurrentMana(), MaxMana = c->getStats().getMaxMana();
+               if (Mana + MaxMana * PERCENT_MAX_MANA_HEAL < MaxMana) {
+                  c->getStats().setCurrentMana(Mana + MaxMana * PERCENT_MAX_MANA_HEAL);
+               }
+               else if (Mana < MaxMana) {
+                  c->getStats().setCurrentMana(MaxMana);
+                  CORE_INFO("Fully healed mana at fountain");
+               }
             }
          }
          
