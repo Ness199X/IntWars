@@ -489,7 +489,7 @@ function parse_unreliable(tvbuf, tree, pktinfo)
 
 	unreliable:add(pf_unreliable_seqnum, tvbuf:range(0, 2))
 	unreliable:add(pf_payload_length, tvbuf:range(2, 2))
-	decode_payload(tvbuf:range(4), reliable, pktinfo)
+	decode_payload(tvbuf:range(4), unreliable, pktinfo)
 end
 
 function parse_fragment(tvbuf, tree, pktinfo)
