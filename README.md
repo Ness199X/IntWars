@@ -1,15 +1,14 @@
-I copy pasterino
-I have no knowledge of coding but Il give it a shot
 ==================
 IntWars
 ==================
 DISCLAIMER: This is for development purposes only, this is not a finished project - and should not be used in a production enviroment.
 About
 ------
-New: Website to provide a central location to discuss the project! http://leaguesandbox.com/
+NEWS: This project has moved on and is currently being ported to C#.
+If you have any questions and/or want to contribute, head over to https://discord.gg/0vmmZ6VAwXB05gB6
 
 This is a fork of the 2 year old project, IntWars. It's a server framework for the MOBA games family.
-If you want to contribute to the project, please fork the repo and upload any progress to GitHub.  
+If you want to contribute to the project, please fork the repo and upload any progress to GitHub.
 If you need help compiling the source on Windows, [check here](http://leaguesandbox.com/forum/viewtopic.php?f=6&t=4).
 
 Important rules and information
@@ -35,8 +34,7 @@ GPLv3 as sharing is caring, and when ever you extend/use/modify/fix any of this 
 
 Contact
 -------
-For information relating to this fork, contact me on reddit: chutch1122  
-I'm working on setting up a website where we can organize this better. http://leaguesandbox.com/
+You can find all the active contributors from this chatroom: https://discord.gg/0vmmZ6VAwXB05gB6
 
 Notes for Compiling on Windows
 ---------
