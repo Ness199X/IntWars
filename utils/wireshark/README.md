@@ -9,6 +9,12 @@ Tested with
   * 64-bit Windows 7 Service Pack 1
   * Win 8.1 64-bit
 * MinGW x64-4.8.1-release-posix-sjlj-rev5
+
+* Wireshark Version 2.0.2 (v2.0.2-0-ga16e22e from master-2.0)
+* Lua 5.2
+* Windows:
+  * 64-bit Windows 10
+* MSVC 2015 x64 (No CMakeFile, yet)
  
 Setup
 -------
