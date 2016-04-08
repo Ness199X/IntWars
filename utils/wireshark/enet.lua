@@ -145,20 +145,34 @@ enet_proto.fields = {
 
 lolcmds = {
 	[0x00] = "KeyCheck",
+	[0x08] = "HeartBeat",
+	[0x09] = "C2S_SellItem",
 	[0x0b] = "RemoveItem",
+	[0x0c] = "S2C_NextAutoAttack",
+	[0x0f] = "EPKT_S2C_OnAttack",
 	
 	[0x11] = "S2C_EndSpawn",
 	[0x14] = "C2S_QueryStatusReq",
 	[0x15] = "S2C_SkillUp",
 	[0x16] = "C2S_Ping_Load_Info",
+	[0x17] = "S2C_ChampionDeathTimer",
 	[0x1A] = "S2C_AutoAttack",
+	[0x1C] = "S2C_EditBuff",
+
+
 	
 	[0x20] = "C2S_SwapItems",
+	[0x22] = "S2C_AddGold",
 	[0x23] = "S2C_FogUpdate2",
+	[0x26] = "S2C_NPC_Die",
 	[0x2A] = "S2C_PlayerInfo",
 	[0x2C] = "S2C_ViewAns",
 	[0x2E] = "C2S_ViewReq",
+	[0x2F] = "S2C_ChampionRespawn",
 	
+	
+	[0x34] = "S2C_StopAutoAttack",
+	[0x35] = "S2C_DeleteObject",
 	[0x39] = "C2S_SkillUp",
 	[0x3B] = "S2C_SpawnProjectile",
 	[0x3E] = "S2C_SwapItems",
@@ -166,31 +180,41 @@ lolcmds = {
 	
 	[0x40] = "S2C_AttentionPing",
 	[0x42] = "S2C_Emotion",
+	[0x45] = "S2C_Announce",
+	[0x47] = "C2S_AutoAttackOption",
 	[0x48] = "C2S_Emotion",
 	[0x4C] = "S2C_HeroSpawn",
 	[0x4D] = "S2C_Announce",
 	
+	[0x50] = "S2C_FaceDirection",
+	[0x51] = "S2C_LeaveVision",
 	[0x52] = "C2S_StartGame",
 	[0x54] = "S2C_SynchVersion",
 	[0x56] = "C2S_ScoreBord",
 	[0x57] = "C2S_AttentionPing",
 	[0x5A] = "S2C_DestroyProjectile",
 	[0x5C] = "C2S_StartGame",
+	[0x5E] = "S2C_ChampionDie",
 	
+	[0x61] = "S2C_MoveAns",
 	[0x62] = "S2C_StartSpawn",
-	[0x64] = "C2S_ClientReady",
+	[0x64] = "C2S_ClientReady | S2C_Dash",
 	[0x65] = "S2C_LoadHero",
 	[0x66] = "S2C_LoadName",
 	[0x67] = "S2C_LoadScreenInfo",
 	[0x68] = "ChatBoxMessage",
 	[0x6A] = "S2C_SetTarget",
+	[0x6B] = "S2C_SetAnimation",
+	[0x6E] = "S2C_ShowProjectile",
 	[0x6F] = "S2C_BuyItemAns",
 	
 	[0x72] = "C2S_MoveReq",
 	[0x77] = "C2S_MoveConfirm",
+	[0x7B] = "S2C_RemoveBuff",
 	
 	[0x81] = "C2S_LockCamera",
 	[0x82] = "C2S_BuyItemReq",
+	[0x85] = "S2C_SetCooldown",
 	[0x87] = "S2C_SpawnParticle",
 	[0x88] = "S2C_QueryStatusAns",
 	[0x8F] = "C2S_Exit",
@@ -199,22 +223,29 @@ lolcmds = {
 	[0x95] = "S2C_Ping_Load_Info",
 	[0x9A] = "C2S_CastSpell",
 	[0x9D] = "S2C_TurretSpawn",
+	[0x9E] = "S2C_NPCHide",
 	
 	[0xA4] = "C2S_Surrender",
 	[0xA8] = "C2S_StatsConfirm",
 	[0xAE] = "S2C_SetHealth",
 	[0xAF] = "C2S_Click",
 	
+	[0xB0] = "S2C_SpellAnimation",
 	[0xB5] = "S2C_CastSpellAns",
-	[0xBA] = "S2C_MinionSpawn",
+	[0xBA] = "S2C_ObjectSpawn",
 	[0xBD] = "C2S_SynchVersion",
 	[0xBE] = "C2S_CharLoaded",
 	
-	[0xC0] = "S2C_GameTimer",
-	[0xC1] = "S2C_GameTimerUpdate",
+	--[0xC0] = "S2C_GameTimer",
+	[0xC0] = "S2C_SetTarget2 (?)",
+	[0xC1] = "S2C_GameTimer",
+	[0xC2] = "S2C_GameTimerUpdate",
 	[0xC4] = "S2C_CharStats",
 	
 	[0xD0] = "S2C_LevelPropSpawn",
+	
+	[0xF7] = "S2C_DebugMessage",
+	[0xFE] = "S2C_Extended",
 	
 	[0xFF] = "Batch"
 }
@@ -408,7 +439,7 @@ function decode_payload(tvrange, tree, pktinfo)
 		
 		loltree:add(pf_payload, tvrange)
 		-- Wireshark crashes for tvbufs where the source is not a child of the original tvbuf
-		--loltree:add(pf_data_decrypted, decryptedByteArray:tvb():range(0))
+		loltree:add(pf_data_decrypted, decryptedByteArray:tvb():range(0))
 		
 		--[[ No longer needed
 		coverage = coverage + data_length
