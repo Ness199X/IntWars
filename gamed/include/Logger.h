@@ -20,7 +20,7 @@ public:
 	 void setLogFile(const char* filename, bool isPlainText = false, bool showOnScreen = false);
 
     void log(const std::string& tag, const char* funcName, const char* sourceFile, 
-        unsigned int lineNum, const std::string& fmt, ...);
+        unsigned int lineNum, const char* fmt, ...);
 
     /**
      * @brief Flushes output buffer. Called for critical events
@@ -49,7 +49,7 @@ private:
 
     FILE* m_pLogFile;
 	 bool isHTML = false;
-	 bool printToScreen = false;
+	 bool printToScreen = true;
 };
 
 

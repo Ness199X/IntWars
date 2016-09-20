@@ -103,7 +103,7 @@ void Game::printPacket(const uint8 *buffer, uint32 size)
 	sprintf(stringbuffer + strlen(stringbuffer), "\n");
 
 	CORE_INFO("%s", stringbuffer);
-	delete[] stringbuffer;
+	//delete[] stringbuffer;
 }
 
 void Game::printLine(uint8 *buf, uint32 len)
@@ -184,6 +184,7 @@ bool Game::broadcastPacketVision(Object* o, const uint8 *data, uint32 length, ui
    for(int i = 0; i < 2; ++i) {
       if(o->isVisibleByTeam(i)) {
          broadcastPacketTeam((i == 0) ? TEAM_BLUE : TEAM_PURPLE, data, length, channelNo, flag);
+				 return true;
       }
    }
 }

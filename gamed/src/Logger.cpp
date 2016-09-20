@@ -55,7 +55,7 @@ void Logger::setLogFile(const char *filename, bool plainText, bool showOnScreen)
 
 void Logger::log(const std::string &tag, const char *funcName,
                  const char *sourceFile, unsigned int lineNum, 
-					  const std::string& fmt, ...)
+									const char* fmt, ...)
 {
 	std::string fileBuffer;
 
@@ -64,7 +64,7 @@ void Logger::log(const std::string &tag, const char *funcName,
 	// Print to file
 	va_list args;
 	const char* bufferCStr = fileBuffer.c_str();
-	va_start(args, bufferCStr);
+	va_start(args, fmt);
 	vfprintf(m_pLogFile, bufferCStr, args);
 	va_end(args);
 
@@ -74,8 +74,8 @@ void Logger::log(const std::string &tag, const char *funcName,
 		fillOutputBuffer(outputBuffer, tag, fmt, funcName, sourceFile, lineNum);
 		// Print to screen
 		const char* bufferCStr = outputBuffer.c_str();
-		va_start(args, bufferCStr);
-		vfprintf(stdout, bufferCStr, args);
+		va_start(args, fmt);
+		vfprintf(m_pLogFile, bufferCStr, args);
 		va_end(args);
 	}
 }
@@ -167,11 +167,7 @@ FILE *Logger::loadFileStream(FILE *stream, const char *filename)
     if(newStream == NULL)
     {
 
-        CORE_ERROR(
-                   "Failed to open logger file: " + std::string(filename) +
-                   ". Using console output...\n\t" +
-                   strerror(errno)
-        );
+        CORE_ERROR("Failed to open logger file");
 
         // Use previous stream
         return stream;

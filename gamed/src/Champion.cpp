@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "Champion.h"
 #include "Config.h"
 #include "RAFManager.h"

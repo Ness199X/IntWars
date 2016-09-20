@@ -10,6 +10,7 @@
 #include "Logger.h"
 #include "Minion.h"
 #include "Champion.h"
+#include <ctime>
 
 Map * Pathfinder::chart = 0;
 auto g_Clock = std::clock(); 
